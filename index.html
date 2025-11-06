@@ -2,9 +2,9 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LED Ur">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
@@ -15,19 +15,22 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         html {
             height: 100%;
             width: 100%;
+            overflow: hidden;
         }
 
         body {
             background: #000000;
             height: 100vh;
-            height: 100dvh; /* Dynamic viewport height for mobile */
             width: 100vw;
-            width: 100dvw;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -40,19 +43,14 @@
             bottom: 0;
             margin: 0;
             padding: 0;
-            /* Support for notch/safe areas */
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
         }
 
         .clock-container {
             position: relative;
             width: 90vmin;
             height: 90vmin;
-            max-width: 500px;
-            max-height: 500px;
+            max-width: 600px;
+            max-height: 600px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -68,8 +66,8 @@
 
         .second-dot {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #333333;
             opacity: 0.3;
@@ -88,59 +86,87 @@
         }
 
         .time-display {
-            font-size: 72px;
+            font-size: 15vmin;
             font-weight: bold;
             color: #ff0000;
-            letter-spacing: 4px;
+            letter-spacing: 0.3em;
             font-family: 'Courier New', monospace;
-            margin-bottom: 20px;
+            margin-bottom: 2vmin;
         }
 
         .date-display {
-            font-size: 28px;
+            font-size: 5vmin;
             font-weight: bold;
             color: #ff0000;
-            letter-spacing: 2px;
+            letter-spacing: 0.2em;
             font-family: 'Courier New', monospace;
             opacity: 0.8;
         }
 
-        @media (max-width: 600px) {
-            .time-display {
-                font-size: 48px;
-                letter-spacing: 2px;
-            }
-
-            .date-display {
-                font-size: 20px;
+        /* iPad specific */
+        @media (min-width: 768px) {
+            .clock-container {
+                width: 70vmin;
+                height: 70vmin;
             }
 
             .second-dot {
-                width: 6px;
-                height: 6px;
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        /* iPhone specific */
+        @media (max-width: 600px) {
+            .time-display {
+                font-size: 12vmin;
+            }
+
+            .date-display {
+                font-size: 4vmin;
+            }
+
+            .second-dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
+
+        /* Landscape mode */
+        @media (orientation: landscape) {
+            .clock-container {
+                width: 60vmin;
+                height: 60vmin;
             }
         }
 
         /* Offline indicator */
         .offline-indicator {
             position: fixed;
-            top: calc(10px + env(safe-area-inset-top));
-            right: calc(10px + env(safe-area-inset-right));
-            background: #00ff00;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 0, 0.9);
             color: #000;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: bold;
             z-index: 1000;
             display: none;
+            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.3);
         }
 
         .offline-indicator.show {
             display: block;
+            animation: fadeIn 0.3s ease-in;
         }
 
-        /* Prevent pull-to-refresh and overscroll */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Prevent overscroll */
         html, body {
             overscroll-behavior: none;
             -webkit-overflow-scrolling: touch;
@@ -165,7 +191,6 @@
             navigator.serviceWorker.register('sw.js')
                 .then(function(reg) {
                     console.log('Service Worker registered! Offline support active!');
-                    // Show offline indicator after successful registration
                     setTimeout(function() {
                         document.getElementById('offlineIndicator').classList.add('show');
                         setTimeout(function() {
@@ -179,8 +204,17 @@
         }
 
         function createSecondsRing() {
+            const container = document.querySelector('.clock-container');
             const secondsRing = document.getElementById('secondsRing');
             const numDots = 60;
+
+            // Calculate based on container size
+            const containerSize = Math.min(container.offsetWidth, container.offsetHeight);
+            const radius = containerSize * 0.48;
+            const centerOffset = containerSize / 2;
+            const dotSize = containerSize * 0.02;
+
+            secondsRing.innerHTML = ''; // Clear existing
 
             for (let i = 0; i < numDots; i++) {
                 const dot = document.createElement('div');
@@ -188,12 +222,13 @@
                 dot.id = 'second-' + i;
 
                 const angle = (i * 360 / numDots) * Math.PI / 180;
-                const radius = 240;
-                const x = Math.cos(angle) * radius + 250;
-                const y = Math.sin(angle) * radius + 250;
+                const x = Math.cos(angle) * radius + centerOffset;
+                const y = Math.sin(angle) * radius + centerOffset;
 
-                dot.style.left = (x - 4) + 'px';
-                dot.style.top = (y - 4) + 'px';
+                dot.style.width = dotSize + 'px';
+                dot.style.height = dotSize + 'px';
+                dot.style.left = (x - dotSize / 2) + 'px';
+                dot.style.top = (y - dotSize / 2) + 'px';
 
                 secondsRing.appendChild(dot);
             }
@@ -226,11 +261,38 @@
             }
         }
 
-        window.addEventListener('load', function() {
+        // Initialize
+        function init() {
             createSecondsRing();
             updateClock();
             setInterval(updateClock, 1000);
+        }
+
+        // Wait for load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // Recreate ring on resize/orientation change
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                createSecondsRing();
+                updateClock();
+            }, 250);
         });
+
+        // Request fullscreen on iOS (best effort)
+        document.body.addEventListener('touchstart', function() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            }
+        }, { once: true });
     </script>
 </body>
 </html>
