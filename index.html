@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LED Ur">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <title>LED Ring Digital Ur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 90vmin;
+            height: 90vmin;
+            max-width: 500px;
+            max-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .seconds-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: rotate(-90deg);
+        }
+
+        .second-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333333;
+            opacity: 0.3;
+            transition: all 0.1s ease;
+        }
+
+        .second-dot.active {
+            background: #ff0000;
+            opacity: 1;
+        }
+
+        .digital-display {
+            position: absolute;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .time-display {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ff0000;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 20px;
+        }
+
+        .date-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff0000;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .time-display {
+                font-size: 48px;
+                letter-spacing: 2px;
+            }
+
+            .date-display {
+                font-size: 20px;
+            }
+
+            .second-dot {
+                width: 6px;
+                height: 6px;
+            }
+        }
+
+        /* Offline indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #00ff00;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+        }
+
+        .offline-indicator.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-indicator" id="offlineIndicator">✓ OFFLINE KLAR</div>
+
+    <div class="clock-container">
+        <div class="seconds-ring" id="secondsRing"></div>
+
+        <div class="digital-display">
+            <div class="time-display" id="timeDisplay">00:00</div>
+            <div class="date-display" id="dateDisplay">01-01-2024</div>
+        </div>
+    </div>
+
+    <script>
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(function(reg) {
+                    console.log('Service Worker registered! Offline support active!');
+                    // Show offline indicator after successful registration
+                    setTimeout(function() {
+                        document.getElementById('offlineIndicator').classList.add('show');
+                        setTimeout(function() {
+                            document.getElementById('offlineIndicator').classList.remove('show');
+                        }, 3000);
+                    }, 500);
+                })
+                .catch(function(err) {
+                    console.log('Service Worker registration failed:', err);
+                });
+        }
+
+        function createSecondsRing() {
+            const secondsRing = document.getElementById('secondsRing');
+            const numDots = 60;
+
+            for (let i = 0; i < numDots; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'second-dot';
+                dot.id = 'second-' + i;
+
+                const angle = (i * 360 / numDots) * Math.PI / 180;
+                const radius = 240;
+                const x = Math.cos(angle) * radius + 250;
+                const y = Math.sin(angle) * radius + 250;
+
+                dot.style.left = (x - 4) + 'px';
+                dot.style.top = (y - 4) + 'px';
+
+                secondsRing.appendChild(dot);
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            const timeString = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+            document.getElementById('timeDisplay').textContent = timeString;
+
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const dateString = day + '-' + month + '-' + year;
+            document.getElementById('dateDisplay').textContent = dateString;
+
+            for (let i = 0; i < 60; i++) {
+                const dot = document.getElementById('second-' + i);
+                if (dot) {
+                    if (i <= seconds) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('load', function() {
+            createSecondsRing();
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+    </script>
+</body>
+</html>
