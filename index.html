@@ -96,24 +96,29 @@
         }
 
         /* iPad Mini (old) - 768x1024 */
-        @media screen and (min-width: 768px) and (max-width: 768px) {
+        @media screen and (min-width: 768px) and (max-width: 820px) {
             .clock-container {
-                width: 600px;
-                height: 600px;
+                width: 650px;
+                height: 650px;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                margin-left: -325px;
+                margin-top: -325px;
             }
             .time-display {
-                font-size: 90px;
+                font-size: 95px;
                 letter-spacing: 12px;
                 margin-bottom: 20px;
             }
             .date-display {
-                font-size: 36px;
+                font-size: 38px;
                 letter-spacing: 6px;
             }
         }
 
-        /* iPad (normal) - 810px+ */
-        @media screen and (min-width: 810px) and (max-width: 1024px) {
+        /* iPad (normal) - 821px+ */
+        @media screen and (min-width: 821px) and (max-width: 1024px) {
             .clock-container {
                 width: 700px;
                 height: 700px;
