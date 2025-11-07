@@ -95,25 +95,26 @@
             opacity: 0.8;
         }
 
-        /* iPad Mini (old) - 768x1024 */
+        /* iPad Mini (old) - 768x1024 - TEST VERSION */
         @media screen and (min-width: 768px) and (max-width: 820px) {
             .clock-container {
-                width: 650px;
-                height: 650px;
+                width: 200px;
+                height: 200px;
                 position: absolute;
                 left: 50%;
                 top: 50%;
-                margin-left: -325px;
-                margin-top: -325px;
+                margin-left: -100px;
+                margin-top: -100px;
+                border: 5px solid lime;
             }
             .time-display {
-                font-size: 95px;
-                letter-spacing: 12px;
-                margin-bottom: 20px;
+                font-size: 30px;
+                letter-spacing: 4px;
+                margin-bottom: 10px;
             }
             .date-display {
-                font-size: 38px;
-                letter-spacing: 6px;
+                font-size: 14px;
+                letter-spacing: 2px;
             }
         }
 
@@ -206,7 +207,7 @@
     </style>
 </head>
 <body>
-    <div class="offline-indicator" id="offlineIndicator">OFFLINE KLAR</div>
+    <div class="offline-indicator" id="offlineIndicator">TEST V4 - OFFLINE KLAR</div>
 
     <div class="clock-container" id="clockContainer">
         <div class="seconds-ring" id="secondsRing"></div>
