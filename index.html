@@ -2,26 +2,19 @@
 <html lang="da">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LED Ur">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="manifest.json">
     <title>LED Ring Digital Ur</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
-        html {
+        html, body {
             height: 100%;
             width: 100%;
             overflow: hidden;
@@ -29,28 +22,35 @@
 
         body {
             background: #000000;
-            height: 100vh;
-            width: 100vw;
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
             align-items: center;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
             justify-content: center;
             font-family: 'Courier New', monospace;
-            overflow: hidden;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            margin: 0;
-            padding: 0;
         }
 
         .clock-container {
             position: relative;
-            width: 95vmin;
-            height: 95vmin;
+            width: 400px;
+            height: 400px;
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
             align-items: center;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
             justify-content: center;
         }
 
@@ -59,16 +59,18 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
+            -webkit-transform: rotate(-90deg);
             transform: rotate(-90deg);
         }
 
         .second-dot {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: #333333;
             opacity: 0.3;
+            -webkit-transition: all 0.1s ease;
             transition: all 0.1s ease;
         }
 
@@ -84,66 +86,21 @@
         }
 
         .time-display {
-            font-size: 15vmin;
+            font-size: 60px;
             font-weight: bold;
             color: #ff0000;
-            letter-spacing: 0.3em;
+            letter-spacing: 8px;
             font-family: 'Courier New', monospace;
-            margin-bottom: 2vmin;
+            margin-bottom: 15px;
         }
 
         .date-display {
-            font-size: 5vmin;
+            font-size: 24px;
             font-weight: bold;
             color: #ff0000;
-            letter-spacing: 0.2em;
+            letter-spacing: 4px;
             font-family: 'Courier New', monospace;
             opacity: 0.8;
-        }
-
-        /* iPad specific */
-        @media (min-width: 768px) {
-            .clock-container {
-                width: 90vmin;
-                height: 90vmin;
-            }
-
-            .second-dot {
-                width: 14px;
-                height: 14px;
-            }
-
-            .time-display {
-                font-size: 15vmin;
-            }
-
-            .date-display {
-                font-size: 6vmin;
-            }
-        }
-
-        /* iPhone specific */
-        @media (max-width: 600px) {
-            .time-display {
-                font-size: 12vmin;
-            }
-
-            .date-display {
-                font-size: 4vmin;
-            }
-
-            .second-dot {
-                width: 8px;
-                height: 8px;
-            }
-        }
-
-        /* Landscape mode */
-        @media (orientation: landscape) {
-            .clock-container {
-                width: 85vh;
-                height: 85vh;
-            }
         }
 
         /* Offline indicator */
@@ -159,28 +116,15 @@
             font-weight: bold;
             z-index: 1000;
             display: none;
-            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.3);
         }
 
         .offline-indicator.show {
             display: block;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Prevent overscroll */
-        html, body {
-            overscroll-behavior: none;
-            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
 <body>
-    <div class="offline-indicator" id="offlineIndicator">✓ OFFLINE KLAR</div>
+    <div class="offline-indicator" id="offlineIndicator">OFFLINE KLAR</div>
 
     <div class="clock-container">
         <div class="seconds-ring" id="secondsRing"></div>
@@ -192,114 +136,96 @@
     </div>
 
     <script>
-        // Register service worker for offline support
+        // Service worker with fallback for old browsers
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then(function(reg) {
-                    console.log('Service Worker registered! Offline support active!');
+                    console.log('Service Worker registered!');
                     setTimeout(function() {
-                        document.getElementById('offlineIndicator').classList.add('show');
+                        var indicator = document.getElementById('offlineIndicator');
+                        indicator.className = 'offline-indicator show';
                         setTimeout(function() {
-                            document.getElementById('offlineIndicator').classList.remove('show');
+                            indicator.className = 'offline-indicator';
                         }, 3000);
                     }, 500);
                 })
                 .catch(function(err) {
-                    console.log('Service Worker registration failed:', err);
+                    console.log('Service Worker not supported');
                 });
         }
 
         function createSecondsRing() {
-            const container = document.querySelector('.clock-container');
-            const secondsRing = document.getElementById('secondsRing');
-            const numDots = 60;
+            var secondsRing = document.getElementById('secondsRing');
+            var numDots = 60;
 
-            // Calculate based on container size
-            const containerSize = Math.min(container.offsetWidth, container.offsetHeight);
-            const radius = containerSize * 0.48;
-            const centerOffset = containerSize / 2;
-            const dotSize = containerSize * 0.02;
+            secondsRing.innerHTML = '';
 
-            secondsRing.innerHTML = ''; // Clear existing
-
-            for (let i = 0; i < numDots; i++) {
-                const dot = document.createElement('div');
+            for (var i = 0; i < numDots; i++) {
+                var dot = document.createElement('div');
                 dot.className = 'second-dot';
                 dot.id = 'second-' + i;
 
-                const angle = (i * 360 / numDots) * Math.PI / 180;
-                const x = Math.cos(angle) * radius + centerOffset;
-                const y = Math.sin(angle) * radius + centerOffset;
+                var angle = (i * 360 / numDots) * Math.PI / 180;
+                var radius = 190;
+                var x = Math.cos(angle) * radius + 200;
+                var y = Math.sin(angle) * radius + 200;
 
-                dot.style.width = dotSize + 'px';
-                dot.style.height = dotSize + 'px';
-                dot.style.left = (x - dotSize / 2) + 'px';
-                dot.style.top = (y - dotSize / 2) + 'px';
+                dot.style.left = (x - 4) + 'px';
+                dot.style.top = (y - 4) + 'px';
 
                 secondsRing.appendChild(dot);
             }
         }
 
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const seconds = now.getSeconds();
+        function pad(num) {
+            return num < 10 ? '0' + num : '' + num;
+        }
 
-            const timeString = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+        function updateClock() {
+            var now = new Date();
+            var hours = now.getHours();
+            var minutes = now.getMinutes();
+            var seconds = now.getSeconds();
+
+            var timeString = pad(hours) + ':' + pad(minutes);
             document.getElementById('timeDisplay').textContent = timeString;
 
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const dateString = day + '-' + month + '-' + year;
+            var day = pad(now.getDate());
+            var month = pad(now.getMonth() + 1);
+            var year = now.getFullYear();
+            var dateString = day + '-' + month + '-' + year;
             document.getElementById('dateDisplay').textContent = dateString;
 
-            for (let i = 0; i < 60; i++) {
-                const dot = document.getElementById('second-' + i);
+            for (var i = 0; i < 60; i++) {
+                var dot = document.getElementById('second-' + i);
                 if (dot) {
                     if (i <= seconds) {
-                        dot.classList.add('active');
+                        dot.className = 'second-dot active';
                     } else {
-                        dot.classList.remove('active');
+                        dot.className = 'second-dot';
                     }
                 }
             }
         }
 
-        // Initialize
         function init() {
             createSecondsRing();
             updateClock();
             setInterval(updateClock, 1000);
         }
 
-        // Wait for load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
+        // Start when page loads
+        if (document.addEventListener) {
+            document.addEventListener('DOMContentLoaded', init, false);
+        } else if (document.attachEvent) {
+            document.attachEvent('onreadystatechange', function() {
+                if (document.readyState === 'complete') {
+                    init();
+                }
+            });
         } else {
-            init();
+            window.onload = init;
         }
-
-        // Recreate ring on resize/orientation change
-        let resizeTimer;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                createSecondsRing();
-                updateClock();
-            }, 250);
-        });
-
-        // Request fullscreen on iOS (best effort)
-        document.body.addEventListener('touchstart', function() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
-        }, { once: true });
     </script>
 </body>
-
 </html>
