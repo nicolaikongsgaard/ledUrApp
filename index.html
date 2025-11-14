@@ -362,22 +362,35 @@
             // Ringsted coordinates: 55.4407° N, 11.7902° E
             var url = 'https://api.open-meteo.com/v1/forecast?latitude=55.4407&longitude=11.7902&current=temperature_2m&timezone=Europe/Copenhagen';
 
+            console.log('Fetching weather data...');
+            
             fetch(url)
                 .then(function(response) {
+                    console.log('Weather response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
                     return response.json();
                 })
                 .then(function(data) {
-                    var temp = Math.round(data.current.temperature_2m);
-                    document.getElementById('weatherDisplay').textContent = temp + '°C';
-                    console.log('Weather updated: ' + temp + '°C');
+                    console.log('Weather API response:', JSON.stringify(data));
+                    if (data && data.current && typeof data.current.temperature_2m !== 'undefined') {
+                        var temp = Math.round(data.current.temperature_2m);
+                        document.getElementById('weatherDisplay').textContent = temp + '°C';
+                        console.log('Weather updated successfully: ' + temp + '°C');
+                    } else {
+                        console.log('Invalid weather data structure');
+                        document.getElementById('weatherDisplay').textContent = 'N/A';
+                    }
                 })
                 .catch(function(error) {
-                    console.log('Weather fetch error:', error);
+                    console.log('Weather fetch error:', error.message || error);
                     document.getElementById('weatherDisplay').textContent = '--°C';
                 });
         }
 
         function init() {
+            console.log('Initializing clock...');
             createSecondsRing();
             updateClock();
             setInterval(updateClock, 1000);
@@ -416,20 +429,4 @@
         }
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
