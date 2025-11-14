@@ -98,6 +98,14 @@
             opacity: 0.8;
         }
 
+        .weather-display {
+            font-weight: bold;
+            color: #ff0000;
+            font-family: 'Courier New', monospace;
+            opacity: 0.6;
+            margin-top: 10px;
+        }
+
         /* iPad Mini (old) - Portrait mode */
         @media screen and (min-width: 768px) and (max-width: 820px) and (orientation: portrait) {
             .clock-container {
@@ -118,6 +126,10 @@
                 font-size: 34px;
                 letter-spacing: 5px;
             }
+            .weather-display {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
         }
 
         /* iPad (normal) - 821px+ */
@@ -134,6 +146,10 @@
             .date-display {
                 font-size: 44px;
                 letter-spacing: 8px;
+            }
+            .weather-display {
+                font-size: 36px;
+                letter-spacing: 6px;
             }
         }
 
@@ -152,6 +168,10 @@
                 font-size: 52px;
                 letter-spacing: 10px;
             }
+            .weather-display {
+                font-size: 42px;
+                letter-spacing: 8px;
+            }
         }
 
         /* iPhone / small devices */
@@ -168,6 +188,10 @@
             .date-display {
                 font-size: 20px;
                 letter-spacing: 4px;
+            }
+            .weather-display {
+                font-size: 16px;
+                letter-spacing: 3px;
             }
         }
 
@@ -191,6 +215,10 @@
                 font-size: 60px;
                 letter-spacing: 5px;
             }
+            .weather-display {
+                font-size: 48px;
+                letter-spacing: 4px;
+            }
         }
 
         /* Landscape mode - small screens */
@@ -207,6 +235,10 @@
             .date-display {
                 font-size: 20px;
                 letter-spacing: 4px;
+            }
+            .weather-display {
+                font-size: 16px;
+                letter-spacing: 3px;
             }
         }
 
@@ -239,6 +271,7 @@
         <div class="digital-display">
             <div class="time-display" id="timeDisplay">00:00</div>
             <div class="date-display" id="dateDisplay">01-01-2024</div>
+            <div class="weather-display" id="weatherDisplay">--°C</div>
         </div>
     </div>
 
@@ -325,10 +358,33 @@
             }
         }
 
+        function updateWeather() {
+            // Ringsted coordinates: 55.4407° N, 11.7902° E
+            var url = 'https://api.open-meteo.com/v1/forecast?latitude=55.4407&longitude=11.7902&current=temperature_2m&timezone=Europe/Copenhagen';
+
+            fetch(url)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    var temp = Math.round(data.current.temperature_2m);
+                    document.getElementById('weatherDisplay').textContent = temp + '°C';
+                    console.log('Weather updated: ' + temp + '°C');
+                })
+                .catch(function(error) {
+                    console.log('Weather fetch error:', error);
+                    document.getElementById('weatherDisplay').textContent = '--°C';
+                });
+        }
+
         function init() {
             createSecondsRing();
             updateClock();
             setInterval(updateClock, 1000);
+
+            // Update weather now and every 10 minutes
+            updateWeather();
+            setInterval(updateWeather, 600000); // 10 minutes
         }
 
         // Recreate on resize
