@@ -386,28 +386,38 @@
 
         function updateWeatherSimple() {
             // Ultra-simple fallback using text format (no JSON parsing needed)
-            var url = 'https://wttr.in/Ringsted?format=%t';
+            // iOS 9.3.5 has TLS limitations, so we'll try HTTP as last resort
+            var isVeryOldIOS = navigator.userAgent.match(/OS 9_/);
+            var url = isVeryOldIOS ? 'http://wttr.in/Ringsted?format=%t' : 'https://wttr.in/Ringsted?format=%t';
+
             console.log('[WEATHER] Using simple text format fallback');
+            console.log('[WEATHER] iOS 9 detected:', !!isVeryOldIOS);
             console.log('[WEATHER] URL:', url);
 
             var xhr = new XMLHttpRequest();
             var timeoutId = setTimeout(function() {
                 xhr.abort();
-                console.log('[WEATHER] Simple request timeout');
+                console.log('[WEATHER] Simple request timeout after 10s');
                 document.getElementById('weatherDisplay').textContent = 'T/O';
             }, 10000);
 
             xhr.onreadystatechange = function() {
+                console.log('[WEATHER] XHR readyState:', xhr.readyState, 'status:', xhr.status);
                 if (xhr.readyState === 4) {
                     clearTimeout(timeoutId);
                     if (xhr.status === 200) {
-                        console.log('[WEATHER] Simple response:', xhr.responseText);
+                        console.log('[WEATHER] Simple response received:', xhr.responseText);
                         // Response is like "+7°C" or "-2°C"
                         var temp = xhr.responseText.trim();
                         document.getElementById('weatherDisplay').textContent = temp;
                         console.log('[WEATHER] SUCCESS! Temperature:', temp);
+                    } else if (xhr.status === 0) {
+                        console.log('[WEATHER] Status 0 - Network error or CORS blocked');
+                        console.log('[WEATHER] This usually means TLS/SSL handshake failed on old iOS');
+                        document.getElementById('weatherDisplay').textContent = 'NET';
                     } else {
                         console.log('[WEATHER] Simple ERROR. Status:', xhr.status);
+                        console.log('[WEATHER] Status text:', xhr.statusText);
                         document.getElementById('weatherDisplay').textContent = '--°C';
                     }
                 }
@@ -415,16 +425,31 @@
 
             xhr.onerror = function() {
                 clearTimeout(timeoutId);
-                console.log('[WEATHER] Simple network error - device may not support HTTPS to this API');
+                console.log('[WEATHER] XHR onerror triggered');
+                console.log('[WEATHER] Network error - likely TLS incompatibility on iOS 9.3.5');
+                console.log('[WEATHER] wttr.in may require TLS 1.2+ which iOS 9 has limited support for');
                 document.getElementById('weatherDisplay').textContent = 'NET';
             };
 
+            xhr.onload = function() {
+                console.log('[WEATHER] XHR onload - status:', xhr.status);
+            };
+
+            xhr.onabort = function() {
+                console.log('[WEATHER] XHR aborted');
+            };
+
             try {
+                console.log('[WEATHER] Opening XHR connection...');
                 xhr.open('GET', url, true);
+                console.log('[WEATHER] Sending XHR request...');
                 xhr.send();
+                console.log('[WEATHER] XHR request sent, waiting for response...');
             } catch (error) {
                 clearTimeout(timeoutId);
-                console.log('[WEATHER] Simple exception:', error);
+                console.log('[WEATHER] XHR exception:', error);
+                console.log('[WEATHER] Exception name:', error.name);
+                console.log('[WEATHER] Exception message:', error.message);
                 document.getElementById('weatherDisplay').textContent = 'ERR';
             }
         }
