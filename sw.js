@@ -1,5 +1,5 @@
 // Service Worker for offline support
-const CACHE_NAME = 'led-ur-v13';
+const CACHE_NAME = 'led-ur-v14';
 const urlsToCache = [
   './',
   './index.html',
