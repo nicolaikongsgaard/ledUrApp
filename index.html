@@ -359,12 +359,12 @@
         }
 
         function updateWeather() {
-            // Ringsted coordinates: 55.4407° N, 11.7902° E
-            var url = 'https://api.open-meteo.com/v1/forecast?latitude=55.4407&longitude=11.7902&current=temperature_2m&timezone=Europe/Copenhagen';
+            // Using wttr.in API for Ringsted, Denmark
+            var url = 'https://wttr.in/Ringsted?format=j1';
 
             console.log('[WEATHER] Starting fetch... User Agent:', navigator.userAgent);
             console.log('[WEATHER] URL:', url);
-            
+
             // Check if fetch is available
             if (typeof fetch === 'undefined') {
                 console.log('[WEATHER] ERROR: fetch() not supported!');
@@ -376,30 +376,42 @@
                 console.log('[WEATHER] Request timeout after 10 seconds');
                 document.getElementById('weatherDisplay').textContent = 'T/O';
             }, 10000);
-            
-            fetch(url)
+
+            // Use explicit fetch options for better iOS/iPad compatibility
+            var fetchOptions = {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'omit',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            };
+
+            fetch(url, fetchOptions)
                 .then(function(response) {
                     clearTimeout(timeoutId);
                     console.log('[WEATHER] Response received. Status:', response.status);
-                    console.log('[WEATHER] Response headers:', response.headers);
-                    
+                    console.log('[WEATHER] Response type:', response.type);
+
                     if (!response.ok) {
                         throw new Error('HTTP ' + response.status);
                     }
                     return response.text(); // Get as text first
                 })
                 .then(function(text) {
-                    console.log('[WEATHER] Raw response:', text);
+                    console.log('[WEATHER] Raw response:', text.substring(0, 200)); // Log first 200 chars
                     var data = JSON.parse(text);
-                    console.log('[WEATHER] Parsed data:', JSON.stringify(data));
-                    
-                    if (data && data.current && typeof data.current.temperature_2m !== 'undefined') {
-                        var temp = Math.round(data.current.temperature_2m);
+                    console.log('[WEATHER] Parsed successfully');
+
+                    // wttr.in JSON structure: data.current_condition[0].temp_C
+                    if (data && data.current_condition && data.current_condition[0] && data.current_condition[0].temp_C) {
+                        var temp = Math.round(parseFloat(data.current_condition[0].temp_C));
                         document.getElementById('weatherDisplay').textContent = temp + '°C';
                         console.log('[WEATHER] SUCCESS! Temperature:', temp + '°C');
                     } else {
                         console.log('[WEATHER] ERROR: Invalid data structure');
-                        console.log('[WEATHER] data.current:', data.current);
+                        console.log('[WEATHER] data:', JSON.stringify(data).substring(0, 200));
                         document.getElementById('weatherDisplay').textContent = 'N/A';
                     }
                 })
@@ -407,8 +419,19 @@
                     clearTimeout(timeoutId);
                     console.log('[WEATHER] ERROR:', error);
                     console.log('[WEATHER] Error message:', error.message);
+                    console.log('[WEATHER] Error name:', error.name);
                     console.log('[WEATHER] Error stack:', error.stack);
-                    document.getElementById('weatherDisplay').textContent = '--°C';
+
+                    // Provide specific error codes for different failure types
+                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                        console.log('[WEATHER] Network error - likely CORS or connection issue');
+                        document.getElementById('weatherDisplay').textContent = 'NET';
+                    } else if (error.name === 'SyntaxError') {
+                        console.log('[WEATHER] JSON parsing error');
+                        document.getElementById('weatherDisplay').textContent = 'JSN';
+                    } else {
+                        document.getElementById('weatherDisplay').textContent = '--°C';
+                    }
                 });
         }
 

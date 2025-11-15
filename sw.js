@@ -1,5 +1,5 @@
 // Service Worker for offline support
-const CACHE_NAME = 'led-ur-v9';
+const CACHE_NAME = 'led-ur-v11';
 const urlsToCache = [
   './',
   './index.html',
@@ -43,6 +43,13 @@ self.addEventListener('activate', function(event) {
 
 // Fetch from cache first, then network
 self.addEventListener('fetch', function(event) {
+  // Don't intercept weather API requests - let them go directly to network
+  if (event.request.url.includes('wttr.in')) {
+    console.log('Bypassing cache for weather API:', event.request.url);
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
@@ -56,8 +63,8 @@ self.addEventListener('fetch', function(event) {
 
         return fetch(fetchRequest).then(
           function(response) {
-            // Check if valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
+            // Check if valid response - allow both 'basic' and 'cors' types
+            if(!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) {
               return response;
             }
 
