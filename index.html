@@ -376,13 +376,24 @@
                 console.log('[WEATHER] Request timeout after 10 seconds');
                 document.getElementById('weatherDisplay').textContent = 'T/O';
             }, 10000);
-            
-            fetch(url)
+
+            // Use explicit fetch options for better iOS/iPad compatibility
+            var fetchOptions = {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'omit',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            };
+
+            fetch(url, fetchOptions)
                 .then(function(response) {
                     clearTimeout(timeoutId);
                     console.log('[WEATHER] Response received. Status:', response.status);
-                    console.log('[WEATHER] Response headers:', response.headers);
-                    
+                    console.log('[WEATHER] Response type:', response.type);
+
                     if (!response.ok) {
                         throw new Error('HTTP ' + response.status);
                     }
@@ -407,8 +418,19 @@
                     clearTimeout(timeoutId);
                     console.log('[WEATHER] ERROR:', error);
                     console.log('[WEATHER] Error message:', error.message);
+                    console.log('[WEATHER] Error name:', error.name);
                     console.log('[WEATHER] Error stack:', error.stack);
-                    document.getElementById('weatherDisplay').textContent = '--°C';
+
+                    // Provide specific error codes for different failure types
+                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                        console.log('[WEATHER] Network error - likely CORS or connection issue');
+                        document.getElementById('weatherDisplay').textContent = 'NET';
+                    } else if (error.name === 'SyntaxError') {
+                        console.log('[WEATHER] JSON parsing error');
+                        document.getElementById('weatherDisplay').textContent = 'JSN';
+                    } else {
+                        document.getElementById('weatherDisplay').textContent = '--°C';
+                    }
                 });
         }
 
