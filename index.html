@@ -8,262 +8,75 @@
     <meta name="apple-mobile-web-app-title" content="LED Ur">
     <title>LED Ring Digital Ur</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; overflow: hidden; }
         body {
-            background: #000000;
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: flex;
-            -webkit-box-align: center;
-            -webkit-align-items: center;
-            align-items: center;
-            -webkit-box-pack: center;
-            -webkit-justify-content: center;
-            justify-content: center;
+            background: #000;
+            display: flex; align-items: center; justify-content: center;
             font-family: 'Courier New', monospace;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         }
-
-        .clock-container {
-            position: relative;
-            display: -webkit-box;
-            display: -webkit-flex;
-            display: flex;
-            -webkit-box-align: center;
-            -webkit-align-items: center;
-            align-items: center;
-            -webkit-box-pack: center;
-            -webkit-justify-content: center;
-            justify-content: center;
-        }
-
-        .seconds-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            -webkit-transform: rotate(-90deg);
-            transform: rotate(-90deg);
-        }
-
-        .second-dot {
-            position: absolute;
-            border-radius: 50%;
-            background: #333333;
-            opacity: 0.3;
-            -webkit-transition: all 0.1s ease;
-            transition: all 0.1s ease;
-        }
-
-        .second-dot.active {
-            background: #ff0000;
-            opacity: 1;
-        }
-
-        .digital-display {
-            position: absolute;
-            text-align: center;
-            z-index: 10;
-            width: 100%;
-            top: 52%;
-            -webkit-transform: translateY(-50%);
-            transform: translateY(-50%);
-        }
-
-        .time-display {
-            font-weight: bold;
-            color: #ff0000;
-            font-family: 'Courier New', monospace;
-        }
-
-        .date-display {
-            font-weight: bold;
-            color: #ff0000;
-            font-family: 'Courier New', monospace;
-            opacity: 0.8;
-        }
-
-        .weather-display {
-            font-weight: bold;
-            color: #ff0000;
-            font-family: 'Courier New', monospace;
-            opacity: 0.6;
-            margin-top: 10px;
-        }
+        .clock-container { position: relative; display:flex; align-items:center; justify-content:center; }
+        .seconds-ring { position: absolute; width:100%; height:100%; border-radius:50%; transform:rotate(-90deg); }
+        .second-dot { position:absolute; border-radius:50%; background:#333; opacity:0.3; transition:all 0.1s ease; }
+        .second-dot.active { background:#ff0000; opacity:1; }
+        .digital-display { position:absolute; text-align:center; z-index:10; width:100%; top:52%; transform:translateY(-50%); }
+        .time-display { font-weight:bold; color:#ff0000; font-family:'Courier New', monospace; }
+        .date-display { font-weight:bold; color:#ff0000; font-family:'Courier New', monospace; opacity:0.8; }
+        .weather-display { font-weight:bold; color:#ff0000; font-family:'Courier New', monospace; opacity:0.6; margin-top:10px; }
 
         /* iPad Mini (old) - Portrait mode */
         @media screen and (min-width: 768px) and (max-width: 820px) and (orientation: portrait) {
-            .clock-container {
-                width: 600px;
-                height: 600px;
-                position: absolute;
-                left: 45%;
-                top: 52%;
-                margin-left: -550px;
-                margin-top: -300px;
-            }
-            .time-display {
-                font-size: 85px;
-                letter-spacing: 10px;
-                margin-bottom: 15px;
-            }
-            .date-display {
-                font-size: 34px;
-                letter-spacing: 5px;
-            }
-            .weather-display {
-                font-size: 28px;
-                letter-spacing: 4px;
-            }
+            .clock-container { width:600px; height:600px; position:absolute; left:45%; top:52%; margin-left:-550px; margin-top:-300px; }
+            .time-display { font-size:85px; letter-spacing:10px; margin-bottom:15px; }
+            .date-display { font-size:34px; letter-spacing:5px; }
+            .weather-display { font-size:28px; letter-spacing:4px; }
         }
 
         /* iPad (normal) - 821px+ */
         @media screen and (min-width: 821px) and (max-width: 1024px) {
-            .clock-container {
-                width: 700px;
-                height: 700px;
-            }
-            .time-display {
-                font-size: 110px;
-                letter-spacing: 15px;
-                margin-bottom: 25px;
-            }
-            .date-display {
-                font-size: 44px;
-                letter-spacing: 8px;
-            }
-            .weather-display {
-                font-size: 36px;
-                letter-spacing: 6px;
-            }
+            .clock-container { width:700px; height:700px; }
+            .time-display { font-size:110px; letter-spacing:15px; margin-bottom:25px; }
+            .date-display { font-size:44px; letter-spacing:8px; }
+            .weather-display { font-size:36px; letter-spacing:6px; }
         }
 
         /* iPad Pro / Desktop */
         @media screen and (min-width: 1025px) {
-            .clock-container {
-                width: 800px;
-                height: 800px;
-            }
-            .time-display {
-                font-size: 130px;
-                letter-spacing: 18px;
-                margin-bottom: 30px;
-            }
-            .date-display {
-                font-size: 52px;
-                letter-spacing: 10px;
-            }
-            .weather-display {
-                font-size: 42px;
-                letter-spacing: 8px;
-            }
+            .clock-container { width:800px; height:800px; }
+            .time-display { font-size:130px; letter-spacing:18px; margin-bottom:30px; }
+            .date-display { font-size:52px; letter-spacing:10px; }
+            .weather-display { font-size:42px; letter-spacing:8px; }
         }
 
         /* iPhone / small devices */
         @media screen and (max-width: 767px) {
-            .clock-container {
-                width: 350px;
-                height: 350px;
-            }
-            .time-display {
-                font-size: 50px;
-                letter-spacing: 8px;
-                margin-bottom: 15px;
-            }
-            .date-display {
-                font-size: 20px;
-                letter-spacing: 4px;
-            }
-            .weather-display {
-                font-size: 16px;
-                letter-spacing: 3px;
-            }
+            .clock-container { width:350px; height:350px; }
+            .time-display { font-size:50px; letter-spacing:8px; margin-bottom:15px; }
+            .date-display { font-size:20px; letter-spacing:4px; }
+            .weather-display { font-size:16px; letter-spacing:3px; }
         }
 
-        /* Landscape mode - iPad Mini */
+        /* Landscape iPad Mini */
         @media (orientation: landscape) and (min-width: 768px) and (max-width: 1024px) {
-            .clock-container {
-                width: 650px;
-                height: 650px;
-                position: absolute;
-                left: 45%;
-                top: 50%;
-                margin-left: -600px;
-                margin-top: -325px;
-            }
-            .time-display {
-                font-size: 125px;
-                letter-spacing: 9px;
-                margin-bottom: 12px;
-            }
-            .date-display {
-                font-size: 60px;
-                letter-spacing: 5px;
-            }
-            .weather-display {
-                font-size: 48px;
-                letter-spacing: 4px;
-            }
+            .clock-container { width:650px; height:650px; position:absolute; left:45%; top:50%; margin-left:-600px; margin-top:-325px; }
+            .time-display { font-size:125px; letter-spacing:9px; margin-bottom:12px; }
+            .date-display { font-size:60px; letter-spacing:5px; }
+            .weather-display { font-size:48px; letter-spacing:4px; }
         }
 
-        /* Landscape mode - small screens */
-        @media (orientation: landscape) and (max-width: 767px) {
-            .clock-container {
-                width: 350px;
-                height: 350px;
-            }
-            .time-display {
-                font-size: 50px;
-                letter-spacing: 8px;
-                margin-bottom: 15px;
-            }
-            .date-display {
-                font-size: 20px;
-                letter-spacing: 4px;
-            }
-            .weather-display {
-                font-size: 16px;
-                letter-spacing: 3px;
-            }
+        /* Offline/Online indicator */
+        .status-indicator {
+            position: fixed; top: 20px; right: 20px; padding: 8px 15px; border-radius:8px;
+            font-size:14px; font-weight:bold; z-index:1000; display:none;
         }
-
-        /* Offline indicator */
-        .offline-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 255, 0, 0.9);
-            color: #000;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 1000;
-            display: none;
-        }
-
-        .offline-indicator.show {
-            display: block;
-        }
+        .status-indicator.show { display:block; }
+        .status-indicator.online { background: rgba(0,255,0,0.95); color: #000; }
+        .status-indicator.offline { background: rgba(255,0,0,0.95); color: #fff; }
     </style>
 </head>
 <body>
-    <div class="offline-indicator" id="offlineIndicator">✓ OFFLINE KLAR</div>
+    <div id="statusIndicator" class="status-indicator">STATUS</div>
 
     <div class="clock-container" id="clockContainer">
         <div class="seconds-ring" id="secondsRing"></div>
@@ -276,321 +89,218 @@
     </div>
 
     <script>
-        // Service worker - disable on old iOS versions (can cause network issues)
-        var isOldIOS = navigator.userAgent.match(/OS [5-9]_/) || navigator.userAgent.match(/OS 10_/);
-
-        if ('serviceWorker' in navigator && !isOldIOS) {
-            navigator.serviceWorker.register('sw.js')
-                .then(function(reg) {
-                    console.log('Service Worker registered!');
-                    setTimeout(function() {
-                        var indicator = document.getElementById('offlineIndicator');
-                        indicator.className = 'offline-indicator show';
-                        setTimeout(function() {
-                            indicator.className = 'offline-indicator';
-                        }, 3000);
-                    }, 500);
-                })
-                .catch(function(err) {
-                    console.log('Service Worker not supported');
-                });
-        } else if (isOldIOS) {
-            console.log('Service Worker disabled on old iOS (compatibility)');
+        // --- Hjælpefunktioner og detektion af iPad Mini ---
+        function isIpadMini() {
+            // Vi bruger både matchMedia (bredde-range du selv brugte i CSS) og touch-detektion
+            try {
+                var inRange = window.matchMedia && window.matchMedia('(min-width: 768px) and (max-width: 820px)').matches;
+                var userAgentIpad = /iPad/.test(navigator.userAgent);
+                var ipadOSReportedAsMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+                // Samlet: hvis en iPad-agtig enhed ligger i den kendte iPad mini-bredde
+                return (userAgentIpad || ipadOSReportedAsMac) && inRange;
+            } catch (e) {
+                return false;
+            }
         }
 
+        var IS_IPAD_MINI = isIpadMini();
+        console.log('IS_IPAD_MINI:', IS_IPAD_MINI);
+
+        // --- Status indikator (online/offline) ---
+        var statusIndicator = document.getElementById('statusIndicator');
+        function showStatus(isOnline) {
+            statusIndicator.classList.add('show');
+            if (isOnline) {
+                statusIndicator.classList.remove('offline');
+                statusIndicator.classList.add('online');
+                statusIndicator.textContent = 'ONLINE';
+            } else {
+                statusIndicator.classList.remove('online');
+                statusIndicator.classList.add('offline');
+                statusIndicator.textContent = 'OFFLINE';
+            }
+            // Skjul efter 4 sekunder
+            clearTimeout(statusIndicator._hideTimeout);
+            statusIndicator._hideTimeout = setTimeout(function() {
+                statusIndicator.classList.remove('show');
+            }, 4000);
+        }
+
+        window.addEventListener('online', function() { showStatus(true); });
+        window.addEventListener('offline', function() { showStatus(false); });
+
+        // Vis initial status kort
+        showStatus(navigator.onLine);
+
+        // --- Seconds ring og ur ---
         function createSecondsRing() {
             var container = document.getElementById('clockContainer');
             var secondsRing = document.getElementById('secondsRing');
             var numDots = 60;
-
-            // Get actual container size
-            var containerSize = Math.min(container.offsetWidth, container.offsetHeight);
-            var radius = containerSize * 0.475; // 47.5% of size
+            var containerSize = Math.min(container.offsetWidth || 800, container.offsetHeight || 800);
+            var radius = containerSize * 0.475;
             var centerOffset = containerSize / 2;
-            var dotSize = Math.max(6, containerSize * 0.018); // Min 6px, max 1.8% of size
-
+            var dotSize = Math.max(6, containerSize * 0.018);
             secondsRing.innerHTML = '';
-
             for (var i = 0; i < numDots; i++) {
                 var dot = document.createElement('div');
                 dot.className = 'second-dot';
                 dot.id = 'second-' + i;
-
                 var angle = (i * 360 / numDots) * Math.PI / 180;
                 var x = Math.cos(angle) * radius + centerOffset;
                 var y = Math.sin(angle) * radius + centerOffset;
-
                 dot.style.width = dotSize + 'px';
                 dot.style.height = dotSize + 'px';
                 dot.style.left = (x - dotSize / 2) + 'px';
                 dot.style.top = (y - dotSize / 2) + 'px';
-
                 secondsRing.appendChild(dot);
             }
-
             console.log('Clock created: ' + containerSize + 'px, dots: ' + dotSize + 'px');
         }
 
-        function pad(num) {
-            return num < 10 ? '0' + num : '' + num;
-        }
-
+        function pad(n){ return n < 10 ? '0' + n : '' + n; }
         function updateClock() {
             var now = new Date();
-            var hours = now.getHours();
-            var minutes = now.getMinutes();
-            var seconds = now.getSeconds();
-
-            var timeString = pad(hours) + ':' + pad(minutes);
-            document.getElementById('timeDisplay').textContent = timeString;
-
-            var day = pad(now.getDate());
-            var month = pad(now.getMonth() + 1);
-            var year = now.getFullYear();
-            var dateString = day + '-' + month + '-' + year;
-            document.getElementById('dateDisplay').textContent = dateString;
-
-            for (var i = 0; i < 60; i++) {
+            var hours = now.getHours(), minutes = now.getMinutes(), seconds = now.getSeconds();
+            document.getElementById('timeDisplay').textContent = pad(hours) + ':' + pad(minutes);
+            var day = pad(now.getDate()), month = pad(now.getMonth()+1), year = now.getFullYear();
+            document.getElementById('dateDisplay').textContent = day + '-' + month + '-' + year;
+            for (var i=0;i<60;i++){
                 var dot = document.getElementById('second-' + i);
-                if (dot) {
-                    if (i <= seconds) {
-                        dot.className = 'second-dot active';
-                    } else {
-                        dot.className = 'second-dot';
-                    }
-                }
+                if(!dot) continue;
+                dot.className = (i <= seconds) ? 'second-dot active' : 'second-dot';
             }
         }
 
+        // --- Weather parsing og hentning ---
         function parseWeatherData(text) {
-            // Parse and display temperature data
             try {
                 var data = JSON.parse(text);
-                console.log('[WEATHER] Parsed successfully');
-
-                // wttr.in JSON structure: data.current_condition[0].temp_C
-                if (data && data.current_condition && data.current_condition[0] && data.current_condition[0].temp_C) {
+                if (data && data.current_condition && data.current_condition[0] && data.current_condition[0].temp_C !== undefined) {
                     var temp = Math.round(parseFloat(data.current_condition[0].temp_C));
                     document.getElementById('weatherDisplay').textContent = temp + '°C';
-                    console.log('[WEATHER] SUCCESS! Temperature:', temp + '°C');
-                } else {
-                    console.log('[WEATHER] ERROR: Invalid data structure');
-                    console.log('[WEATHER] data:', JSON.stringify(data).substring(0, 200));
-                    document.getElementById('weatherDisplay').textContent = 'N/A';
+                    console.log('[WEATHER] SUCCESS temp:', temp);
+                    return true;
                 }
-            } catch (error) {
-                console.log('[WEATHER] JSON parsing error:', error);
-                document.getElementById('weatherDisplay').textContent = 'JSN';
+            } catch (e) {
+                console.log('[WEATHER] JSON parse error', e);
+            }
+            return false;
+        }
+
+        function hideWeatherForIpadMini(reason) {
+            // Skjul kun hvis det er iPad mini - ellers vis fejltekst
+            var el = document.getElementById('weatherDisplay');
+            if (IS_IPAD_MINI) {
+                el.style.display = 'none';
+                console.log('[WEATHER] Skjuler vejrudsigten på iPad mini:', reason);
+            } else {
+                el.textContent = '--°C';
+                console.log('[WEATHER] Viser fallback (ikke iPad mini):', reason);
             }
         }
 
-        function updateWeatherSimple() {
-            // Ultra-simple fallback using text format (no JSON parsing needed)
-            // iOS 9.3.5 has TLS limitations, so we'll try HTTP as last resort
-            var isVeryOldIOS = navigator.userAgent.match(/OS 9_/);
-            var url = isVeryOldIOS ? 'http://wttr.in/Ringsted?format=%t' : 'https://wttr.in/Ringsted?format=%t';
-
-            console.log('[WEATHER] Using simple text format fallback');
-            console.log('[WEATHER] iOS 9 detected:', !!isVeryOldIOS);
-            console.log('[WEATHER] URL:', url);
-
-            var xhr = new XMLHttpRequest();
-            var timeoutId = setTimeout(function() {
-                xhr.abort();
-                console.log('[WEATHER] Simple request timeout after 10s');
-                document.getElementById('weatherDisplay').textContent = 'T/O';
-            }, 10000);
-
-            xhr.onreadystatechange = function() {
-                console.log('[WEATHER] XHR readyState:', xhr.readyState, 'status:', xhr.status);
-                if (xhr.readyState === 4) {
-                    clearTimeout(timeoutId);
-                    if (xhr.status === 200) {
-                        console.log('[WEATHER] Simple response received:', xhr.responseText);
-                        // Response is like "+7°C" or "-2°C"
-                        var temp = xhr.responseText.trim();
-                        document.getElementById('weatherDisplay').textContent = temp;
-                        console.log('[WEATHER] SUCCESS! Temperature:', temp);
-                    } else if (xhr.status === 0) {
-                        console.log('[WEATHER] Status 0 - Network error or CORS blocked');
-                        console.log('[WEATHER] This usually means TLS/SSL handshake failed on old iOS');
-                        document.getElementById('weatherDisplay').textContent = 'NET';
-                    } else {
-                        console.log('[WEATHER] Simple ERROR. Status:', xhr.status);
-                        console.log('[WEATHER] Status text:', xhr.statusText);
-                        document.getElementById('weatherDisplay').textContent = '--°C';
-                    }
-                }
-            };
-
-            xhr.onerror = function() {
-                clearTimeout(timeoutId);
-                console.log('[WEATHER] XHR onerror triggered');
-                console.log('[WEATHER] Network error - likely TLS incompatibility on iOS 9.3.5');
-                console.log('[WEATHER] wttr.in may require TLS 1.2+ which iOS 9 has limited support for');
-                document.getElementById('weatherDisplay').textContent = 'NET';
-            };
-
-            xhr.onload = function() {
-                console.log('[WEATHER] XHR onload - status:', xhr.status);
-            };
-
-            xhr.onabort = function() {
-                console.log('[WEATHER] XHR aborted');
-            };
-
-            try {
-                console.log('[WEATHER] Opening XHR connection...');
-                xhr.open('GET', url, true);
-                console.log('[WEATHER] Sending XHR request...');
-                xhr.send();
-                console.log('[WEATHER] XHR request sent, waiting for response...');
-            } catch (error) {
-                clearTimeout(timeoutId);
-                console.log('[WEATHER] XHR exception:', error);
-                console.log('[WEATHER] Exception name:', error.name);
-                console.log('[WEATHER] Exception message:', error.message);
-                document.getElementById('weatherDisplay').textContent = 'ERR';
-            }
-        }
-
-        function updateWeatherXHR() {
-            // Fallback using XMLHttpRequest for old iOS/Safari versions
+        function updateWeatherXHR(isIpadAttempt) {
             var url = 'https://wttr.in/Ringsted?format=j1';
-            console.log('[WEATHER] Using XMLHttpRequest fallback');
-            console.log('[WEATHER] URL:', url);
-
             var xhr = new XMLHttpRequest();
-            var timeoutId = setTimeout(function() {
-                xhr.abort();
-                console.log('[WEATHER] Request timeout after 10 seconds');
-                document.getElementById('weatherDisplay').textContent = 'T/O';
-            }, 10000);
+            var timeoutMs = isIpadAttempt ? 7000 : 10000; // kortere timeout for iPad mini
+            var timeoutId = setTimeout(function(){ xhr.abort(); }, timeoutMs);
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     clearTimeout(timeoutId);
                     if (xhr.status === 200) {
-                        console.log('[WEATHER] XHR Response received. Status:', xhr.status);
-                        console.log('[WEATHER] Response:', xhr.responseText.substring(0, 200));
-                        parseWeatherData(xhr.responseText);
+                        if (!parseWeatherData(xhr.responseText)) {
+                            hideWeatherForIpadMini('Ugyldigt JSON svar');
+                        }
                     } else {
-                        console.log('[WEATHER] XHR ERROR. Status:', xhr.status);
-                        console.log('[WEATHER] Trying simple text format...');
-                        updateWeatherSimple();
+                        console.log('[WEATHER] XHR status:', xhr.status);
+                        hideWeatherForIpadMini('XHR error status ' + xhr.status);
                     }
                 }
             };
-
-            xhr.onerror = function() {
-                clearTimeout(timeoutId);
-                console.log('[WEATHER] XHR network error, trying simple format...');
-                updateWeatherSimple();
-            };
-
-            try {
-                xhr.open('GET', url, true);
-                xhr.send();
-            } catch (error) {
-                clearTimeout(timeoutId);
-                console.log('[WEATHER] XHR exception:', error);
-                console.log('[WEATHER] Trying simple format...');
-                updateWeatherSimple();
-            }
+            xhr.onerror = function(){ clearTimeout(timeoutId); hideWeatherForIpadMini('XHR network error'); };
+            try { xhr.open('GET', url, true); xhr.send(); }
+            catch (e) { clearTimeout(timeoutId); hideWeatherForIpadMini('XHR exception'); }
         }
 
-        function updateWeather() {
-            // Using wttr.in API for Ringsted, Denmark
+        function updateWeatherFetch(isIpadAttempt) {
             var url = 'https://wttr.in/Ringsted?format=j1';
-
-            console.log('[WEATHER] Starting fetch... User Agent:', navigator.userAgent);
-            console.log('[WEATHER] iOS version:', navigator.userAgent.match(/OS (\d+)_/));
-
-            // Try fetch first, fallback to XMLHttpRequest for old iOS
-            if (typeof fetch === 'undefined' || navigator.userAgent.match(/OS [5-9]_/)) {
-                console.log('[WEATHER] Using XMLHttpRequest (old iOS or no fetch)');
-                updateWeatherXHR();
-                return;
-            }
-
-            var timeoutId = setTimeout(function() {
-                console.log('[WEATHER] Request timeout after 10 seconds');
-                document.getElementById('weatherDisplay').textContent = 'T/O';
-            }, 10000);
-
-            // Use explicit fetch options for better iOS/iPad compatibility
-            var fetchOptions = {
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-cache',
-                credentials: 'omit',
-                headers: {
-                    'Accept': 'application/json'
+            var timeoutMs = isIpadAttempt ? 7000 : 10000;
+            var didRespond = false;
+            var timer = setTimeout(function() {
+                if (!didRespond) {
+                    console.log('[WEATHER] Fetch timeout');
+                    // fallback to XHR
+                    updateWeatherXHR(isIpadAttempt);
                 }
-            };
+            }, timeoutMs);
 
-            fetch(url, fetchOptions)
-                .then(function(response) {
-                    clearTimeout(timeoutId);
-                    console.log('[WEATHER] Response received. Status:', response.status);
-                    console.log('[WEATHER] Response type:', response.type);
-
-                    if (!response.ok) {
-                        throw new Error('HTTP ' + response.status);
-                    }
+            // For iPad mini, vi vil forsøge, men hvis fetch fejler skjuler vi vejret
+            fetch(url, { method:'GET', mode:'cors', cache:'no-cache', credentials:'omit', headers:{ 'Accept':'application/json' } })
+                .then(function(response){
+                    didRespond = true; clearTimeout(timer);
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
                     return response.text();
                 })
-                .then(function(text) {
-                    console.log('[WEATHER] Raw response:', text.substring(0, 200));
-                    parseWeatherData(text);
+                .then(function(text){
+                    if (!parseWeatherData(text)) {
+                        hideWeatherForIpadMini('Fetch modtog ugyldigt JSON');
+                    }
                 })
-                .catch(function(error) {
-                    clearTimeout(timeoutId);
-                    console.log('[WEATHER] Fetch failed, trying XMLHttpRequest fallback');
-                    console.log('[WEATHER] Error:', error.message);
-                    // Fallback to XMLHttpRequest
-                    updateWeatherXHR();
+                .catch(function(err){
+                    clearTimeout(timer);
+                    console.log('[WEATHER] Fetch catch:', err);
+                    // fallback til XHR (kan være nødvendig for gamle iOS)
+                    updateWeatherXHR(isIpadAttempt);
                 });
         }
 
+        function updateWeather() {
+            // Hvis offline, skjul vejret hurtigere på iPad mini
+            if (!navigator.onLine) {
+                hideWeatherForIpadMini('Offline');
+                return;
+            }
+
+            // Hvis iPad mini: prøv, men hvis fetch/XHR fejler, SKJUL vejret (brugeren bad om kun skjule for iPad mini)
+            if (IS_IPAD_MINI) {
+                console.log('[WEATHER] Forsøger vejrudsigten FOR iPad mini med kort timeout');
+                updateWeatherFetch(true);
+            } else {
+                console.log('[WEATHER] Forsøger vejrudsigten normalt');
+                updateWeatherFetch(false);
+            }
+        }
+
+        // --- Init og resize håndtering ---
         function init() {
             console.log('Initializing clock...');
             createSecondsRing();
             updateClock();
             setInterval(updateClock, 1000);
 
-            // Update weather now and every 10 minutes
+            // Update weather nu og senere
             updateWeather();
-            setInterval(updateWeather, 600000); // 10 minutes
-        }
+            setInterval(updateWeather, 600000); // 10 minutter
 
-        // Recreate on resize
-        var resizeTimer;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
-                createSecondsRing();
-                updateClock();
-            }, 250);
-        });
-
-        // Start when page loads
-        if (document.addEventListener) {
-            document.addEventListener('DOMContentLoaded', init, false);
-        } else if (document.attachEvent) {
-            document.attachEvent('onreadystatechange', function() {
-                if (document.readyState === 'complete') {
-                    init();
-                }
+            // Recreate ring ved resize
+            var resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    createSecondsRing();
+                    updateClock();
+                }, 250);
             });
-        } else {
-            window.onload = init;
+
+            // Vis initial status kort
+            showStatus(navigator.onLine);
         }
 
-        // Also init immediately if DOM is already loaded
-        if (document.readyState !== 'loading') {
-            init();
-        }
+        // DOM ready
+        if (document.readyState !== 'loading') init();
+        else document.addEventListener('DOMContentLoaded', init, false);
     </script>
 </body>
 </html>
