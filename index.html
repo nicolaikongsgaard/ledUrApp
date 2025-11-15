@@ -358,17 +358,82 @@
             }
         }
 
+        function parseWeatherData(text) {
+            // Parse and display temperature data
+            try {
+                var data = JSON.parse(text);
+                console.log('[WEATHER] Parsed successfully');
+
+                // wttr.in JSON structure: data.current_condition[0].temp_C
+                if (data && data.current_condition && data.current_condition[0] && data.current_condition[0].temp_C) {
+                    var temp = Math.round(parseFloat(data.current_condition[0].temp_C));
+                    document.getElementById('weatherDisplay').textContent = temp + '°C';
+                    console.log('[WEATHER] SUCCESS! Temperature:', temp + '°C');
+                } else {
+                    console.log('[WEATHER] ERROR: Invalid data structure');
+                    console.log('[WEATHER] data:', JSON.stringify(data).substring(0, 200));
+                    document.getElementById('weatherDisplay').textContent = 'N/A';
+                }
+            } catch (error) {
+                console.log('[WEATHER] JSON parsing error:', error);
+                document.getElementById('weatherDisplay').textContent = 'JSN';
+            }
+        }
+
+        function updateWeatherXHR() {
+            // Fallback using XMLHttpRequest for old iOS/Safari versions
+            var url = 'https://wttr.in/Ringsted?format=j1';
+            console.log('[WEATHER] Using XMLHttpRequest fallback');
+            console.log('[WEATHER] URL:', url);
+
+            var xhr = new XMLHttpRequest();
+            var timeoutId = setTimeout(function() {
+                xhr.abort();
+                console.log('[WEATHER] Request timeout after 10 seconds');
+                document.getElementById('weatherDisplay').textContent = 'T/O';
+            }, 10000);
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    clearTimeout(timeoutId);
+                    if (xhr.status === 200) {
+                        console.log('[WEATHER] XHR Response received. Status:', xhr.status);
+                        console.log('[WEATHER] Response:', xhr.responseText.substring(0, 200));
+                        parseWeatherData(xhr.responseText);
+                    } else {
+                        console.log('[WEATHER] XHR ERROR. Status:', xhr.status);
+                        document.getElementById('weatherDisplay').textContent = '--°C';
+                    }
+                }
+            };
+
+            xhr.onerror = function() {
+                clearTimeout(timeoutId);
+                console.log('[WEATHER] XHR network error');
+                document.getElementById('weatherDisplay').textContent = 'NET';
+            };
+
+            try {
+                xhr.open('GET', url, true);
+                xhr.send();
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.log('[WEATHER] XHR exception:', error);
+                document.getElementById('weatherDisplay').textContent = 'ERR';
+            }
+        }
+
         function updateWeather() {
             // Using wttr.in API for Ringsted, Denmark
             var url = 'https://wttr.in/Ringsted?format=j1';
 
             console.log('[WEATHER] Starting fetch... User Agent:', navigator.userAgent);
-            console.log('[WEATHER] URL:', url);
+            console.log('[WEATHER] iOS version:', navigator.userAgent.match(/OS (\d+)_/));
 
-            // Check if fetch is available
-            if (typeof fetch === 'undefined') {
-                console.log('[WEATHER] ERROR: fetch() not supported!');
-                document.getElementById('weatherDisplay').textContent = 'ERR';
+            // Try fetch first, fallback to XMLHttpRequest for old iOS
+            if (typeof fetch === 'undefined' || navigator.userAgent.match(/OS [5-9]_/)) {
+                console.log('[WEATHER] Using XMLHttpRequest (old iOS or no fetch)');
+                updateWeatherXHR();
                 return;
             }
 
@@ -397,41 +462,18 @@
                     if (!response.ok) {
                         throw new Error('HTTP ' + response.status);
                     }
-                    return response.text(); // Get as text first
+                    return response.text();
                 })
                 .then(function(text) {
-                    console.log('[WEATHER] Raw response:', text.substring(0, 200)); // Log first 200 chars
-                    var data = JSON.parse(text);
-                    console.log('[WEATHER] Parsed successfully');
-
-                    // wttr.in JSON structure: data.current_condition[0].temp_C
-                    if (data && data.current_condition && data.current_condition[0] && data.current_condition[0].temp_C) {
-                        var temp = Math.round(parseFloat(data.current_condition[0].temp_C));
-                        document.getElementById('weatherDisplay').textContent = temp + '°C';
-                        console.log('[WEATHER] SUCCESS! Temperature:', temp + '°C');
-                    } else {
-                        console.log('[WEATHER] ERROR: Invalid data structure');
-                        console.log('[WEATHER] data:', JSON.stringify(data).substring(0, 200));
-                        document.getElementById('weatherDisplay').textContent = 'N/A';
-                    }
+                    console.log('[WEATHER] Raw response:', text.substring(0, 200));
+                    parseWeatherData(text);
                 })
                 .catch(function(error) {
                     clearTimeout(timeoutId);
-                    console.log('[WEATHER] ERROR:', error);
-                    console.log('[WEATHER] Error message:', error.message);
-                    console.log('[WEATHER] Error name:', error.name);
-                    console.log('[WEATHER] Error stack:', error.stack);
-
-                    // Provide specific error codes for different failure types
-                    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                        console.log('[WEATHER] Network error - likely CORS or connection issue');
-                        document.getElementById('weatherDisplay').textContent = 'NET';
-                    } else if (error.name === 'SyntaxError') {
-                        console.log('[WEATHER] JSON parsing error');
-                        document.getElementById('weatherDisplay').textContent = 'JSN';
-                    } else {
-                        document.getElementById('weatherDisplay').textContent = '--°C';
-                    }
+                    console.log('[WEATHER] Fetch failed, trying XMLHttpRequest fallback');
+                    console.log('[WEATHER] Error:', error.message);
+                    // Fallback to XMLHttpRequest
+                    updateWeatherXHR();
                 });
         }
 
