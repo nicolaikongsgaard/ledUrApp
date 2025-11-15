@@ -276,8 +276,10 @@
     </div>
 
     <script>
-        // Service worker
-        if ('serviceWorker' in navigator) {
+        // Service worker - disable on old iOS versions (can cause network issues)
+        var isOldIOS = navigator.userAgent.match(/OS [5-9]_/) || navigator.userAgent.match(/OS 10_/);
+
+        if ('serviceWorker' in navigator && !isOldIOS) {
             navigator.serviceWorker.register('sw.js')
                 .then(function(reg) {
                     console.log('Service Worker registered!');
@@ -292,6 +294,8 @@
                 .catch(function(err) {
                     console.log('Service Worker not supported');
                 });
+        } else if (isOldIOS) {
+            console.log('Service Worker disabled on old iOS (compatibility)');
         }
 
         function createSecondsRing() {
@@ -380,6 +384,51 @@
             }
         }
 
+        function updateWeatherSimple() {
+            // Ultra-simple fallback using text format (no JSON parsing needed)
+            var url = 'https://wttr.in/Ringsted?format=%t';
+            console.log('[WEATHER] Using simple text format fallback');
+            console.log('[WEATHER] URL:', url);
+
+            var xhr = new XMLHttpRequest();
+            var timeoutId = setTimeout(function() {
+                xhr.abort();
+                console.log('[WEATHER] Simple request timeout');
+                document.getElementById('weatherDisplay').textContent = 'T/O';
+            }, 10000);
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    clearTimeout(timeoutId);
+                    if (xhr.status === 200) {
+                        console.log('[WEATHER] Simple response:', xhr.responseText);
+                        // Response is like "+7°C" or "-2°C"
+                        var temp = xhr.responseText.trim();
+                        document.getElementById('weatherDisplay').textContent = temp;
+                        console.log('[WEATHER] SUCCESS! Temperature:', temp);
+                    } else {
+                        console.log('[WEATHER] Simple ERROR. Status:', xhr.status);
+                        document.getElementById('weatherDisplay').textContent = '--°C';
+                    }
+                }
+            };
+
+            xhr.onerror = function() {
+                clearTimeout(timeoutId);
+                console.log('[WEATHER] Simple network error - device may not support HTTPS to this API');
+                document.getElementById('weatherDisplay').textContent = 'NET';
+            };
+
+            try {
+                xhr.open('GET', url, true);
+                xhr.send();
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.log('[WEATHER] Simple exception:', error);
+                document.getElementById('weatherDisplay').textContent = 'ERR';
+            }
+        }
+
         function updateWeatherXHR() {
             // Fallback using XMLHttpRequest for old iOS/Safari versions
             var url = 'https://wttr.in/Ringsted?format=j1';
@@ -402,15 +451,16 @@
                         parseWeatherData(xhr.responseText);
                     } else {
                         console.log('[WEATHER] XHR ERROR. Status:', xhr.status);
-                        document.getElementById('weatherDisplay').textContent = '--°C';
+                        console.log('[WEATHER] Trying simple text format...');
+                        updateWeatherSimple();
                     }
                 }
             };
 
             xhr.onerror = function() {
                 clearTimeout(timeoutId);
-                console.log('[WEATHER] XHR network error');
-                document.getElementById('weatherDisplay').textContent = 'NET';
+                console.log('[WEATHER] XHR network error, trying simple format...');
+                updateWeatherSimple();
             };
 
             try {
@@ -419,7 +469,8 @@
             } catch (error) {
                 clearTimeout(timeoutId);
                 console.log('[WEATHER] XHR exception:', error);
-                document.getElementById('weatherDisplay').textContent = 'ERR';
+                console.log('[WEATHER] Trying simple format...');
+                updateWeatherSimple();
             }
         }
 
