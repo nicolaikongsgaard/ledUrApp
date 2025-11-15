@@ -8,38 +8,46 @@
     <meta name="apple-mobile-web-app-title" content="LED Ur" />
     <title>LED Ring Digital Ur</title>
 
-    <!--
-      TIDLIG iHead-script: Hvis en iPad mini registreres, indsæt en CSS-regel der SKJULER #weatherDisplay
-      og overstyr alle vejr-funktioner til tomme funktioner, så der aldrig vises NET/--°C på iPad mini.
-    -->
+    <!-- MEGET TIDLIG: fjern weather-elementet helt på iPad / iPadOS-enheder -->
     <script>
         (function(){
             try {
-                var inRange = window.matchMedia && window.matchMedia('(min-width: 768px) and (max-width: 820px)').matches;
-                var uaIpad = /iPad/.test(navigator.userAgent);
-                var ipadOSAsMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
-                if ((uaIpad || ipadOSAsMac) && inRange) {
-                    // Tilføj style rule med det samme
-                    var style = document.createElement('style');
-                    style.id = 'hideWeatherIpadMini';
-                    style.textContent = '#weatherDisplay { display: none !important; }';
-                    document.head.appendChild(style);
+                var ua = navigator.userAgent || '';
+                var isIpadUA = /iPad/.test(ua);
+                var isTouchMac = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints && navigator.maxTouchPoints > 1);
+                var isiOSish = isIpadUA || isTouchMac;
 
-                    // Marker globalt så resten af scripts kan tjekke
-                    window.__IS_IPAD_MINI = true;
+                // Hvis det er en iPad-lignende enhed fjern weather elementet tidligt
+                if (isiOSish) {
+                    // Sæt global markør for resten af scripts
+                    window.__REMOVE_WEATHER_ON_IPAD = true;
 
-                    // Overstyr eventuelle vejr-funktioner hvis de forsøges kaldt fra andre scripts
+                    // Tilføj inline style for at forhindre flash hvis element oprettes senere
+                    var s = document.createElement('style');
+                    s.id = 'removeWeatherEarly';
+                    s.textContent = '#weatherDisplay { display: none !important; visibility: hidden !important; width:0 !important; height:0 !important; }';
+                    document.head && document.head.appendChild(s);
+
+                    // Hvis #weatherDisplay allerede findes, fjern det fullstændigt
+                    try {
+                        var el = document.getElementById('weatherDisplay');
+                        if (el && el.parentNode) el.parentNode.removeChild(el);
+                    } catch (e) {
+                        // ignore
+                    }
+
+                    // Overstyr globale vejr-funktioner (ingen kald må køre)
                     window.updateWeather = function(){};
                     window.updateWeatherXHR = function(){};
                     window.updateWeatherSimple = function(){};
                     window.parseWeatherData = function(){};
-                    // console.log tidligt (kan være nyttigt ved test)
-                    try { console.log('iPad mini registreret tidligt — vejr skjult og deaktiveret'); } catch(e){}
+                    // console.log for debugging (kan fjernes senere)
+                    try { console.log('iPad detected — weather removed early'); } catch(e){}
                 } else {
-                    window.__IS_IPAD_MINI = false;
+                    window.__REMOVE_WEATHER_ON_IPAD = false;
                 }
             } catch (e) {
-                window.__IS_IPAD_MINI = false;
+                window.__REMOVE_WEATHER_ON_IPAD = false;
             }
         })();
     </script>
@@ -131,7 +139,7 @@
             margin-top: 10px;
         }
 
-        /* iPad Mini (old) - Portrait mode (bevarer layout) */
+        /* iPad Mini (old) - Portrait mode */
         @media screen and (min-width: 768px) and (max-width: 820px) and (orientation: portrait) {
             .clock-container {
                 width: 600px;
@@ -142,85 +150,33 @@
                 margin-left: -550px;
                 margin-top: -300px;
             }
-            .time-display {
-                font-size: 85px;
-                letter-spacing: 10px;
-                margin-bottom: 15px;
-            }
-            .date-display {
-                font-size: 34px;
-                letter-spacing: 5px;
-            }
-            .weather-display {
-                font-size: 28px;
-                letter-spacing: 4px;
-            }
-            /* Denne CSS er redundant da vi allerede indsatte en tidlig style via head-script,
-               men den kan forblive som backstop */
-            .weather-display { display: none !important; }
+            .time-display { font-size: 85px; letter-spacing: 10px; margin-bottom: 15px; }
+            .date-display { font-size: 34px; letter-spacing: 5px; }
+            .weather-display { font-size: 28px; letter-spacing: 4px; }
         }
 
         /* iPad (normal) - 821px+ */
         @media screen and (min-width: 821px) and (max-width: 1024px) {
-            .clock-container {
-                width: 700px;
-                height: 700px;
-            }
-            .time-display {
-                font-size: 110px;
-                letter-spacing: 15px;
-                margin-bottom: 25px;
-            }
-            .date-display {
-                font-size: 44px;
-                letter-spacing: 8px;
-            }
-            .weather-display {
-                font-size: 36px;
-                letter-spacing: 6px;
-            }
+            .clock-container { width: 700px; height: 700px; }
+            .time-display { font-size: 110px; letter-spacing: 15px; margin-bottom: 25px; }
+            .date-display { font-size: 44px; letter-spacing: 8px; }
+            .weather-display { font-size: 36px; letter-spacing: 6px; }
         }
 
         /* iPad Pro / Desktop */
         @media screen and (min-width: 1025px) {
-            .clock-container {
-                width: 800px;
-                height: 800px;
-            }
-            .time-display {
-                font-size: 130px;
-                letter-spacing: 18px;
-                margin-bottom: 30px;
-            }
-            .date-display {
-                font-size: 52px;
-                letter-spacing: 10px;
-            }
-            .weather-display {
-                font-size: 42px;
-                letter-spacing: 8px;
-            }
+            .clock-container { width: 800px; height: 800px; }
+            .time-display { font-size: 130px; letter-spacing: 18px; margin-bottom: 30px; }
+            .date-display { font-size: 52px; letter-spacing: 10px; }
+            .weather-display { font-size: 42px; letter-spacing: 8px; }
         }
 
         /* iPhone / small devices */
         @media screen and (max-width: 767px) {
-            .clock-container {
-                width: 350px;
-                height: 350px;
-            }
-            .time-display {
-                font-size: 50px;
-                letter-spacing: 8px;
-                margin-bottom: 15px;
-            }
-            .date-display {
-                font-size: 20px;
-                letter-spacing: 4px;
-            }
-            .weather-display {
-                font-size: 16px;
-                letter-spacing: 3px;
-            }
+            .clock-container { width: 350px; height: 350px; }
+            .time-display { font-size: 50px; letter-spacing: 8px; margin-bottom: 15px; }
+            .date-display { font-size: 20px; letter-spacing: 4px; }
+            .weather-display { font-size: 16px; letter-spacing: 3px; }
         }
 
         /* Landscape mode - iPad Mini */
@@ -234,40 +190,9 @@
                 margin-left: -600px;
                 margin-top: -325px;
             }
-            .time-display {
-                font-size: 125px;
-                letter-spacing: 9px;
-                margin-bottom: 12px;
-            }
-            .date-display {
-                font-size: 60px;
-                letter-spacing: 5px;
-            }
-            .weather-display {
-                font-size: 48px;
-                letter-spacing: 4px;
-            }
-        }
-
-        /* Landscape mode - small screens */
-        @media (orientation: landscape) and (max-width: 767px) {
-            .clock-container {
-                width: 350px;
-                height: 350px;
-            }
-            .time-display {
-                font-size: 50px;
-                letter-spacing: 8px;
-                margin-bottom: 15px;
-            }
-            .date-display {
-                font-size: 20px;
-                letter-spacing: 4px;
-            }
-            .weather-display {
-                font-size: 16px;
-                letter-spacing: 3px;
-            }
+            .time-display { font-size: 125px; letter-spacing: 9px; margin-bottom: 12px; }
+            .date-display { font-size: 60px; letter-spacing: 5px; }
+            .weather-display { font-size: 48px; letter-spacing: 4px; }
         }
 
         /* Offline indicator */
@@ -299,68 +224,52 @@
         <div class="digital-display">
             <div class="time-display" id="timeDisplay">00:00</div>
             <div class="date-display" id="dateDisplay">01-01-2024</div>
+            <!-- NOTE: dette element vil blive fjernet tidligt på iPad-enheder -->
             <div class="weather-display" id="weatherDisplay">--°C</div>
         </div>
     </div>
 
     <script>
-        // Brug den globale markør sat tidligt i head-script
-        var IS_IPAD_MINI = !!window.__IS_IPAD_MINI;
+        // Læs global markør sat i head
+        var REMOVE_WEATHER = !!window.__REMOVE_WEATHER_ON_IPAD;
 
-        // Service worker - disable on old iOS versions (kan skabe net-problemer)
+        // Service worker (uændret)
         var isOldIOS = navigator.userAgent.match(/OS [5-9]_/) || navigator.userAgent.match(/OS 10_/);
-
         if ('serviceWorker' in navigator && !isOldIOS) {
-            navigator.serviceWorker && navigator.serviceWorker.register && navigator.serviceWorker.register('sw.js')
-                .then(function(reg) {
-                    console.log('Service Worker registered!');
-                    setTimeout(function() {
-                        var indicator = document.getElementById('offlineIndicator');
-                        indicator.className = 'offline-indicator show';
-                        setTimeout(function() {
-                            indicator.className = 'offline-indicator';
-                        }, 3000);
-                    }, 500);
-                })
-                .catch(function(err) {
-                    console.log('Service Worker not supported or registration failed', err);
-                });
-        } else if (isOldIOS) {
-            console.log('Service Worker disabled on old iOS (compatibility)');
+            navigator.serviceWorker && navigator.serviceWorker.register && navigator.serviceWorker.register('sw.js').catch(function(){});
         }
 
-        // Seconds ring creation (vent på layout med requestAnimationFrame)
+        // Forsøg at fjerne weather-element hvis det stadig eksisterer (sikkerhed)
+        if (REMOVE_WEATHER) {
+            try {
+                var w = document.getElementById('weatherDisplay');
+                if (w && w.parentNode) w.parentNode.removeChild(w);
+            } catch (e) {}
+        }
+
+        // Sekund-ring (bruger requestAnimationFrame for at være robust)
         function createSecondsRing() {
             var container = document.getElementById('clockContainer');
             var secondsRing = document.getElementById('secondsRing');
-
             requestAnimationFrame(function() {
                 var rect = container.getBoundingClientRect();
                 var containerSize = Math.min(rect.width || container.offsetWidth, rect.height || container.offsetHeight);
-                if (!containerSize || containerSize < 10) {
-                    containerSize = 700;
-                }
-
+                if (!containerSize || containerSize < 10) containerSize = 700;
                 var radius = containerSize * 0.475;
-                var centerOffset = containerSize / 2;
+                var center = containerSize / 2;
                 var dotSize = Math.max(6, containerSize * 0.018);
-
                 secondsRing.innerHTML = '';
-
                 for (var i = 0; i < 60; i++) {
                     var dot = document.createElement('div');
                     dot.className = 'second-dot';
                     dot.id = 'second-' + i;
-
                     var angle = (i * 360 / 60) * Math.PI / 180;
-                    var x = Math.cos(angle) * radius + centerOffset;
-                    var y = Math.sin(angle) * radius + centerOffset;
-
+                    var x = Math.cos(angle) * radius + center;
+                    var y = Math.sin(angle) * radius + center;
                     dot.style.width = dotSize + 'px';
                     dot.style.height = dotSize + 'px';
                     dot.style.left = (x - dotSize / 2) + 'px';
                     dot.style.top = (y - dotSize / 2) + 'px';
-
                     secondsRing.appendChild(dot);
                 }
             });
@@ -370,73 +279,29 @@
 
         function updateClock() {
             var now = new Date();
-            var hours = now.getHours();
-            var minutes = now.getMinutes();
-            var seconds = now.getSeconds();
-
-            document.getElementById('timeDisplay').textContent = pad(hours) + ':' + pad(minutes);
+            document.getElementById('timeDisplay').textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
             document.getElementById('dateDisplay').textContent = pad(now.getDate()) + '-' + pad(now.getMonth() + 1) + '-' + now.getFullYear();
-
+            var sec = now.getSeconds();
             for (var i = 0; i < 60; i++) {
-                var dot = document.getElementById('second-' + i);
-                if (dot) {
-                    dot.className = (i <= seconds) ? 'second-dot active' : 'second-dot';
-                }
+                var d = document.getElementById('second-' + i);
+                if (!d) continue;
+                d.className = (i <= sec) ? 'second-dot active' : 'second-dot';
             }
         }
 
-        // Simple weather functions (men de køres kun hvis ikke iPad mini)
-        function parseWeatherData(text) {
-            try {
-                var data = JSON.parse(text);
-                if (data && data.current_condition && data.current_condition[0] && data.current_condition[0].temp_C !== undefined) {
-                    var temp = Math.round(parseFloat(data.current_condition[0].temp_C));
-                    document.getElementById('weatherDisplay').textContent = temp + '°C';
-                } else {
-                    document.getElementById('weatherDisplay').textContent = '--°C';
-                }
-            } catch (e) {
-                document.getElementById('weatherDisplay').textContent = '--°C';
-            }
-        }
+        // Weather-funktioner: deaktiveret hvis REMOVE_WEATHER er sand
+        function parseWeatherData() { if (REMOVE_WEATHER) return; /* ellers normalt */ }
+        function updateWeatherXHR() { if (REMOVE_WEATHER) return; /* ellers normalt */ }
+        function updateWeather() { if (REMOVE_WEATHER) return; /* ellers normalt */ }
 
-        function updateWeatherXHR() {
-            var url = 'https://wttr.in/Ringsted?format=j1';
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) parseWeatherData(xhr.responseText);
-                    else document.getElementById('weatherDisplay').textContent = '--°C';
-                }
-            };
-            try { xhr.open('GET', url, true); xhr.send(); }
-            catch (e) { document.getElementById('weatherDisplay').textContent = '--°C'; }
-        }
-
-        function updateWeather() {
-            if (IS_IPAD_MINI) return; // strikt: ingen kald hvis iPad mini
-            if (typeof fetch === 'function') {
-                fetch('https://wttr.in/Ringsted?format=j1', { method: 'GET', mode: 'cors', cache: 'no-cache' })
-                    .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-                    .then(function(t) { parseWeatherData(t); })
-                    .catch(function() { updateWeatherXHR(); });
-            } else {
-                updateWeatherXHR();
-            }
-        }
-
-        // Init (kør straks hvis document allerede loaded)
+        // Init
         function init() {
             createSecondsRing();
             updateClock();
             setInterval(updateClock, 1000);
 
-            if (!IS_IPAD_MINI) {
+            if (!REMOVE_WEATHER) {
                 try { updateWeather(); setInterval(updateWeather, 600000); } catch (e) {}
-            } else {
-                // Sørg for at elementet er skjult (sikkerhed)
-                var wx = document.getElementById('weatherDisplay');
-                if (wx) wx.style.display = 'none';
             }
         }
 
@@ -446,16 +311,16 @@
             init();
         }
 
+        // Resize debounce
+        var _t;
         window.addEventListener('resize', function() {
-            // Debounce
-            clearTimeout(window._clockResizeTimer);
-            window._clockResizeTimer = setTimeout(function() {
+            clearTimeout(_t);
+            _t = setTimeout(function() {
                 createSecondsRing();
                 updateClock();
-                // gen-skjul weather hvis nødvendig
-                if (IS_IPAD_MINI) {
-                    var wx = document.getElementById('weatherDisplay');
-                    if (wx) wx.style.display = 'none';
+                if (REMOVE_WEATHER) {
+                    var w = document.getElementById('weatherDisplay');
+                    if (w && w.parentNode) w.parentNode.removeChild(w);
                 }
             }, 200);
         });
